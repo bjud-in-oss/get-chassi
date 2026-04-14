@@ -1,0 +1,6 @@
+node_modules/
+.DS_Store
+*.log
+debug_page.html
+scratch/
+.env

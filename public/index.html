@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Get-Chassi – Regnummer ↔ Chassinummer</title>
+  <meta name="description" content="Konvertera regnummer till chassinummer och vice versa via biluppgifter.se. Importera CSV utan Google-tjänster." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- Background blobs -->
+<div class="bg-blob blob-1"></div>
+<div class="bg-blob blob-2"></div>
+<div class="bg-blob blob-3"></div>
+
+<div class="app">
+
+  <!-- ── Header ── -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">🚗</span>
+        <span class="logo-text">Get<span class="accent">Chassi</span></span>
+      </div>
+      <p class="header-sub">Regnummer ↔ Chassinummer · Via biluppgifter.se</p>
+    </div>
+  </header>
+
+  <!-- ── Single Lookup Card ── -->
+  <section class="card single-card" id="single-section">
+    <h2 class="card-title">
+      <span class="card-icon">🔍</span> Enskild sökning
+    </h2>
+    <p class="card-desc">Slå upp ett enstaka regnummer eller chassinummer direkt.</p>
+    <div class="search-row">
+      <input id="single-input" class="text-input" type="text" placeholder="T.ex. ABC123 eller WBA3A51030F..."
+             autocomplete="off" spellcheck="false" maxlength="20" />
+      <button id="single-btn" class="btn btn-primary" onclick="singleLookup()">
+        Sök <span class="btn-arrow">→</span>
+      </button>
+    </div>
+    <div id="single-result" class="single-result hidden"></div>
+  </section>
+
+  <!-- ── CSV Upload Card ── -->
+  <section class="card csv-card" id="csv-section">
+    <h2 class="card-title">
+      <span class="card-icon">📂</span> CSV-import
+    </h2>
+    <p class="card-desc">Ladda upp en CSV-fil. Appen identifierar automatiskt vilken kolumn som innehåller regnummer eller chassinummer och fyller i den andra sorter i en ny kolumn.</p>
+
+    <!-- Drop zone -->
+    <div class="dropzone" id="dropzone" onclick="document.getElementById('file-input').click()">
+      <div class="drop-icon">📄</div>
+      <p class="drop-text">Dra och släpp en CSV-fil här<br/><span class="drop-sub">eller klicka för att välja</span></p>
+      <input id="file-input" type="file" accept=".csv,text/csv" style="display:none" onchange="handleFileSelect(event)" />
+    </div>
+
+    <!-- Column picker (hidden until file loaded) -->
+    <div id="column-picker" class="hidden">
+      <div class="picker-header">
+        <h3 class="picker-title">Kolumninställningar</h3>
+        <span id="row-count" class="badge"></span>
+      </div>
+
+      <div class="picker-grid">
+        <div class="picker-field">
+          <label class="picker-label">Kolumn med regnr / chassi</label>
+          <select id="source-col" class="select-input"></select>
+          <span id="col-type-badge" class="type-badge"></span>
+        </div>
+        <div class="picker-field">
+          <label class="picker-label">Ny kolumnrubrik (resultat)</label>
+          <input id="target-col" class="text-input" type="text" value="Konverterat" />
+        </div>
+      </div>
+
+      <!-- Preview table -->
+      <div class="table-wrap" id="preview-wrap">
+        <p class="preview-label">Förhandsgranskning (5 rader)</p>
+        <div id="preview-table"></div>
+      </div>
+
+      <button id="process-btn" class="btn btn-primary btn-wide" onclick="startProcess()">
+        ▶ Starta konvertering
+      </button>
+    </div>
+  </section>
+
+  <!-- ── Progress Card ── -->
+  <section class="card progress-card hidden" id="progress-section">
+    <h2 class="card-title">
+      <span class="card-icon">⚙️</span> Konverterar…
+    </h2>
+    <div class="progress-info">
+      <span id="progress-text">0 / 0</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <div class="log-wrap" id="live-log"></div>
+    <button class="btn btn-outline" id="cancel-btn" onclick="cancelProcess()">Avbryt</button>
+  </section>
+
+  <!-- ── Result Card ── -->
+  <section class="card result-card hidden" id="result-section">
+    <h2 class="card-title">
+      <span class="card-icon">✅</span> Klar!
+    </h2>
+    <div class="result-stats" id="result-stats"></div>
+    <div class="table-wrap result-table-wrap">
+      <div id="result-table"></div>
+    </div>
+    <div class="result-actions">
+      <button class="btn btn-primary" onclick="downloadCSV()">⬇ Ladda ner CSV</button>
+      <button class="btn btn-outline" onclick="resetAll()">↺ Ny fil</button>
+    </div>
+  </section>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
