@@ -1,77 +1,87 @@
-# Installationsguide: get-chassi för Chromebook (Linux)
+# Get-Chassi – Installations- och användarguide för Chromebook (Linux)
 
-Denna guide beskriver steg för steg hur du sätter upp utvecklingsmiljön, installerar Node.js korrekt och startar applikationen `get-chassi` i Linux-miljön (Crostini) på en Chromebook. Guiden löser specifikt problemet med felmeddelandet `npm placeholder: command install not implemented` som är vanligt på ChromeOS.
+Denna guide sammanfogar de projektspecifika inställningarna för **Get-Chassi** med lösningen för ChromeOS-specifika problem (t.ex. `npm placeholder`-felet).
 
-## 1. Rensa bort ChromeOS inbyggda platshållare
-ChromeOS levereras ibland med "döda" genvägar för Node och npm som blockerar riktiga installationer. Börja med att rensa bort dessa:
+---
+
+## 1. Förberedelse: Åtgärda ChromeOS Node/npm-platshållare
+ChromeOS har inbyggda "döda" genvägar för Node och npm. Rensa dem först och installera Node via NVM:
 
 ```bash
-# Avinstallera eventuella systempaket av Node/npm
+# 1. Ta bort gamla systempaket och platshållare
 sudo apt remove -y nodejs npm
-
-# Tvinga bort platshållarfilerna från systemet
 sudo rm -f /usr/bin/npm /usr/local/bin/npm /usr/bin/node /usr/local/bin/node
-
-# Rensa terminalens minne av gamla sökvägar
 hash -r
-```
 
-## 2. Installera NVM (Node Version Manager)
-Det säkraste och smidigaste sättet att installera Node.js i Linux är via NVM.
-
-```bash
-# Ladda ner och installera NVM
+# 2. Installera NVM
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-
-# Ladda in NVM i den nuvarande terminalsessionen
 source ~/.bashrc
-```
 
-## 3. Installera Node.js och säkerställ rätt PATH
-Installera den senaste stabila versionen (LTS) av Node.js.
-
-```bash
-# Installera senaste LTS-versionen av Node.js
+# 3. Installera Node.js (LTS) och lås sök-sökvägen (PATH) för NVM
 nvm install --lts
-```
-
-**Viktigt för Chromebook:** För att säkerställa att terminalen alltid prioriterar NVM:s version av npm istället för att leta efter ChromeOS platshållare, uppdatera din PATH:
-
-```bash
-# Tvinga terminalen att prioritera NVM:s bin-mapp i PATH
 echo 'export PATH="$HOME/.nvm/versions/node/$(nvm current)/bin:$PATH"' >> ~/.bashrc
-
-# Ladda om terminalprofilen
 source ~/.bashrc
 ```
+*Verifiera genom att köra `npm -v`. Det ska visa ett giltigt versionsnummer.*
 
-Kontrollera att installationen lyckades genom att köra `npm -v`. Det ska nu visa ett riktigt versionsnummer (t.ex. `10.8.2`) och *inte* ett "placeholder"-meddelande.
+---
 
-## 4. Hämta källkoden (om du inte redan har den)
-Om du behöver ladda ner projektet på nytt från Git:
+## 2. Klona och Installera Get-Chassi
 
+1. **Klona projektet**:
+   ```bash
+   git clone https://github.com/bjud-in-oss/get-chassi
+   cd get-chassi
+   ```
+
+2. **Installera beroenden**:
+   ```bash
+   npm install
+   ```
+
+   > **Obs vid fel:** Om du får felmeddelandet `ReferenceError: File is not defined`, kör följande kommando för att installera rätt version av Cheerio:
+   > ```bash
+   > npm install cheerio@1.0.0-rc.12
+   > ```
+
+---
+
+## 3. Starta Applikationen
+
+Starta servern med:
 ```bash
-# Installera git om det saknas på datorn
-sudo apt update && sudo apt install -y git
-
-# Klona projektet (byt ut länk till repot nedan)
-git clone <länk-till-git-repo> ~/get-chassi
-```
-
-## 5. Installera beroenden och kör applikationen
-Navigera in i projektmappen, installera alla nödvändiga Node-moduler och starta servern.
-
-```bash
-# Gå till projektmappen
-cd ~/get-chassi
-
-# Installera projektets beroenden (Detta skapar mappen node_modules)
-npm install
-
-# Starta webbservern
 npm start
 ```
-*(Skulle paketet sakna ett npm start-skript kan du starta servern direkt med `node server.js`)*.
 
-När servern är igång och indikerar att den lyssnar på en port, öppna webbläsaren i din Chromebook och navigera till:
-**http://localhost:3000** *(eller den port som anges i terminalen)*.
+När servern är igång visas meddelandet:
+`🚗 Get-Chassi körs på http://localhost:3131`
+
+Öppna din webbläsare på Chromebooken och gå till:
+**[http://localhost:3131](http://localhost:3131)**
+
+---
+
+## 4. Stänga av servern
+
+När du vill avsluta programmet och frigöra systemresurser:
+1. Gå till terminalfönstret där servern körs.
+2. Tryck **`Ctrl + C`**.
+
+Detta gör en säker nedstängning som stänger Puppeteer-webbläsaren, Express-servern och frigör minnet.
+
+---
+
+## 5. Synkronisering (`gs`)
+
+Om du använder `gs` för synkronisering kan du kopiera denna dokumentation till din synkmapp:
+
+```bash
+cp README.md ~/[SYNC_FOLDER]/
+```
+
+---
+
+## Tekniska Detaljer
+- **Port**: 3131
+- **Webbläsare**: Puppeteer (Chromium)
+- **Motor**: Node.js
